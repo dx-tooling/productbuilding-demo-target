@@ -1,0 +1,8 @@
+# Preview Compose file — static site served by nginx.
+# The orchestrator generates an override with Traefik labels and network.
+
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: .productbuilding/preview/Dockerfile

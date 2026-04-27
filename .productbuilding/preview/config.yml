@@ -1,0 +1,10 @@
+version: 1
+
+compose:
+  file: .productbuilding/preview/docker-compose.yml
+  service: app
+
+runtime:
+  internal_port: 8080
+  healthcheck_path: /
+  startup_timeout_seconds: 30
