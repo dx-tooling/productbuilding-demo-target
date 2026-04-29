@@ -43,6 +43,126 @@
       --radius-lg: 10px;
     }
 
+    /* ===== Dark Theme ===== */
+    [data-theme="dark"] {
+      /* Backgrounds */
+      --bg: #0f172a;
+      --white: #1e293b;
+
+      /* Text */
+      --text: #f1f5f9;
+      --text-light: #94a3b8;
+
+      /* Borders */
+      --border: #334155;
+
+      /* Primary adjustments for dark mode */
+      --primary-light: rgba(79, 70, 229, 0.15);
+
+      /* Shadows - darker for dark mode */
+      --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+      --shadow-hover: 0 10px 25px rgba(0,0,0,0.4), 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    /* Hero section gradient - dark variant */
+    [data-theme="dark"] .hero {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+    }
+
+    /* Top bar - darker in dark mode */
+    [data-theme="dark"] .top-bar {
+      background: #020617;
+    }
+
+    /* Footer - darker in dark mode */
+    [data-theme="dark"] .footer {
+      background: #020617;
+    }
+
+    /* Sidebar section borders */
+    [data-theme="dark"] .sidebar-section {
+      border-color: var(--border);
+    }
+
+    /* Card footer border */
+    [data-theme="dark"] .card-footer {
+      border-top-color: var(--border);
+    }
+
+    /* Category list item borders */
+    [data-theme="dark"] .category-list li {
+      border-bottom-color: var(--border);
+    }
+
+    /* Form inputs in dark mode */
+    [data-theme="dark"] .filter-group select,
+    [data-theme="dark"] .filter-group input[type="text"] {
+      background: #1e293b;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    [data-theme="dark"] .filter-group select:focus,
+    [data-theme="dark"] .filter-group input[type="text"]:focus {
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25);
+    }
+
+    /* View toggle buttons */
+    [data-theme="dark"] .view-toggle button {
+      background: #1e293b;
+      border-color: var(--border);
+      color: var(--text-light);
+    }
+
+    /* Empty star color in dark mode */
+    [data-theme="dark"] .stars .empty { fill: #475569; }
+
+    /* Card favorite button - darker background */
+    [data-theme="dark"] .card-favorite {
+      background: rgba(30, 41, 59, 0.95);
+    }
+    [data-theme="dark"] .card-favorite:hover {
+      background: #1e293b;
+    }
+
+    /* Filter toggle button */
+    [data-theme="dark"] .filter-toggle:hover {
+      color: var(--white);
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      transition: all 0.2s;
+      margin-left: 12px;
+    }
+    .theme-toggle:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .theme-toggle svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    /* Hide sun in light mode, hide moon in dark mode */
+    .theme-toggle .icon-sun { display: none; }
+    .theme-toggle .icon-moon { display: block; }
+    [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
     /* ===== Top Bar ===== */
     .top-bar {
       background: var(--dark);
@@ -615,6 +735,22 @@
       .main-nav { display: none; }
     }
   </style>
+  <script>
+    // Immediately invoked function to prevent flash of wrong theme (FOUC)
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else if (savedTheme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        // Auto: check system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      }
+    })();
+  </script>
 </head>
 <body>
 
@@ -644,6 +780,17 @@
         <a href="#">Insights</a>
         <a href="#">Resources</a>
       </nav>
+      <button class="theme-toggle" id="themeToggle" aria-label="Switch to dark mode">
+        <!-- Moon icon (shown in light mode) -->
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+        </svg>
+        <!-- Sun icon (shown in dark mode) -->
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="5"/>
+          <path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+      </button>
     </div>
   </header>
 
@@ -1442,6 +1589,60 @@
         render();
       });
     });
+
+    // ===== Theme Toggle =====
+    const themeToggle = document.getElementById('themeToggle');
+
+    function getCurrentTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved;
+      const htmlTheme = document.documentElement.getAttribute('data-theme');
+      if (htmlTheme) return htmlTheme;
+      return 'auto';
+    }
+
+    function applyTheme(theme) {
+      const html = document.documentElement;
+      if (theme === 'dark') {
+        html.setAttribute('data-theme', 'dark');
+        if (themeToggle) themeToggle.setAttribute('aria-label', 'Switch to light mode');
+      } else if (theme === 'light') {
+        html.setAttribute('data-theme', 'light');
+        if (themeToggle) themeToggle.setAttribute('aria-label', 'Switch to dark mode');
+      } else {
+        // Auto - follow system preference
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+        if (themeToggle) themeToggle.setAttribute('aria-label', prefersDark ? 'Switch to light mode' : 'Switch to dark mode');
+      }
+    }
+
+    function toggleTheme() {
+      const htmlTheme = document.documentElement.getAttribute('data-theme');
+      const isDark = htmlTheme === 'dark';
+      const newTheme = isDark ? 'light' : 'dark';
+      localStorage.setItem('theme', newTheme);
+      applyTheme(newTheme);
+    }
+
+    // Initialize theme button state
+    applyTheme(getCurrentTheme());
+
+    // Toggle button event listener
+    if (themeToggle) {
+      themeToggle.addEventListener('click', toggleTheme);
+    }
+
+    // Listen for system preference changes (for 'auto' mode users)
+    if (window.matchMedia) {
+      const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      colorSchemeQuery.addEventListener('change', (e) => {
+        const savedTheme = localStorage.getItem('theme');
+        if (!savedTheme) {
+          applyTheme(e.matches ? 'dark' : 'light');
+        }
+      });
+    }
 
     // ===== Init =====
     render();
