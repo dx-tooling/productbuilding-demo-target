@@ -7,6 +7,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+  <script>
+    // Blocking theme detection to prevent FOUC
+    (function() {
+      try {
+        const stored = localStorage.getItem('theme');
+        let theme = 'light';
+        if (stored) {
+          theme = stored;
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          theme = 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        // localStorage unavailable (private browsing), default to light
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
   <style>
     /* ===== Reset & Base ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -41,6 +59,24 @@
       --shadow-hover: 0 10px 25px rgba(15,23,42,0.10), 0 4px 10px rgba(15,23,42,0.05);
       --radius: 6px;
       --radius-lg: 10px;
+    }
+
+    /* ===== Dark Theme Variables ===== */
+    [data-theme="dark"] {
+      --primary: #6366f1;
+      --primary-dark: #818cf8;
+      --primary-light: rgba(99, 102, 241, 0.15);
+      --accent: #fbbf24;
+      --success: #34d399;
+      --info: #60a5fa;
+      --dark: #0f172a;
+      --text: #e2e8f0;
+      --text-light: #94a3b8;
+      --bg: #0f172a;
+      --white: #1e293b;
+      --border: #334155;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+      --shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.4), 0 4px 10px rgba(0, 0, 0, 0.3);
     }
 
     /* ===== Top Bar ===== */
@@ -117,6 +153,44 @@
     .main-nav a.active {
       background: var(--primary-light);
       color: var(--primary-dark);
+    }
+
+    /* ===== Theme Toggle ===== */
+    .theme-toggle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      margin-left: 12px;
+      padding: 0;
+    }
+    .theme-toggle:hover {
+      background: var(--primary-light);
+    }
+    .theme-toggle:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+    .theme-toggle svg {
+      flex-shrink: 0;
+    }
+    .theme-toggle .icon-sun,
+    .theme-toggle .icon-moon {
+      display: none;
+    }
+    [data-theme="light"] .theme-toggle .icon-sun,
+    :root:not([data-theme="dark"]) .theme-toggle .icon-sun {
+      display: block;
+    }
+    [data-theme="dark"] .theme-toggle .icon-moon {
+      display: block;
     }
 
     /* ===== Container ===== */
@@ -594,6 +668,83 @@
     }
     .no-results h3 { font-size: 1.3rem; color: var(--dark); margin-bottom: 8px; font-weight: 600; }
 
+    /* ===== Smooth Theme Transitions ===== */
+    @media (prefers-reduced-motion: no-preference) {
+      body, .header, .hero, .breadcrumb, .filter-bar, .filter-panel, .sidebar-section, .vendor-card, .pagination button, .footer, .theme-toggle {
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      }
+    }
+
+    /* ===== Dark Theme Element Overrides ===== */
+    [data-theme="dark"] .hero {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e293b 100%);
+      border-bottom-color: #334155;
+    }
+    [data-theme="dark"] .hero h1 { color: #f8fafc; }
+    [data-theme="dark"] .hero p { color: #cbd5e1; }
+
+    [data-theme="dark"] .logo { color: #f8fafc; }
+    [data-theme="dark"] .card-title { color: #f8fafc; }
+    [data-theme="dark"] .no-results h3 { color: #f8fafc; }
+
+    [data-theme="dark"] .category-list li { border-bottom-color: #334155; }
+    [data-theme="dark"] .card-footer { border-top-color: #334155; }
+    [data-theme="dark"] .stars .empty { fill: #475569; }
+
+    [data-theme="dark"] .filter-group select,
+    [data-theme="dark"] .filter-group input[type="text"] {
+      background: #1e293b;
+      border-color: #334155;
+      color: #e2e8f0;
+    }
+    [data-theme="dark"] .filter-group select:focus,
+    [data-theme="dark"] .filter-group input[type="text"]:focus {
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    [data-theme="dark"] .view-toggle button {
+      background: #1e293b;
+      border-color: #334155;
+      color: #94a3b8;
+    }
+    [data-theme="dark"] .view-toggle button.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    [data-theme="dark"] .pagination button {
+      background: #1e293b;
+      border-color: #334155;
+      color: #e2e8f0;
+    }
+    [data-theme="dark"] .pagination button:hover:not(:disabled) {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    [data-theme="dark"] .footer {
+      background: #020617;
+    }
+
+    [data-theme="dark"] .card-favorite {
+      background: rgba(30, 41, 59, 0.95);
+    }
+    [data-theme="dark"] .card-favorite:hover {
+      background: #1e293b;
+    }
+
+    [data-theme="dark"] .filter-tag {
+      background: rgba(99, 102, 241, 0.2);
+    }
+
+    [data-theme="dark"] .btn-reset {
+      color: #94a3b8;
+    }
+    [data-theme="dark"] .btn-reset:hover {
+      color: #e2e8f0;
+    }
+
     /* ===== Responsive ===== */
     @media (max-width: 1100px) {
       .card-grid { grid-template-columns: repeat(2, 1fr); }
@@ -644,6 +795,22 @@
         <a href="#">Insights</a>
         <a href="#">Resources</a>
       </nav>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="Switch to dark mode" aria-pressed="false">
+        <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden>
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
     </div>
   </header>
 
@@ -1445,6 +1612,52 @@
 
     // ===== Init =====
     render();
+
+    // ===== Theme Toggle =====
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+
+    function updateThemeUI(isDark) {
+      themeToggle.setAttribute('aria-pressed', isDark);
+      themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+
+    function setTheme(theme) {
+      html.setAttribute('data-theme', theme);
+      try {
+        localStorage.setItem('theme', theme);
+      } catch (e) {
+        // localStorage unavailable, continue without persistence
+      }
+      updateThemeUI(theme === 'dark');
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = html.getAttribute('data-theme') || 'light';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+    });
+
+    // Listen for OS preference changes (only if user hasn't manually set preference)
+    if (window.matchMedia) {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      mediaQuery.addEventListener('change', (e) => {
+        try {
+          // Only auto-switch if user hasn't set a manual preference
+          const stored = localStorage.getItem('theme');
+          if (!stored) {
+            setTheme(e.matches ? 'dark' : 'light');
+          }
+        } catch (e) {
+          // localStorage unavailable, follow OS preference
+          setTheme(e.matches ? 'dark' : 'light');
+        }
+      });
+    }
+
+    // Initialize UI based on current theme
+    const currentTheme = html.getAttribute('data-theme') || 'light';
+    updateThemeUI(currentTheme === 'dark');
   </script>
 </body>
 </html>
