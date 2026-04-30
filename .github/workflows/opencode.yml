@@ -23,6 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          persist-credentials: false  # Prevents duplicate Authorization header
           fetch-depth: 0
       - uses: anomalyco/opencode/github@latest
         env:
