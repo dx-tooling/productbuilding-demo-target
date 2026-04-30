@@ -25,6 +25,7 @@
 
     /* ===== Color Variables ===== */
     :root {
+      /* Light theme (default) */
       --primary: #4f46e5;
       --primary-dark: #3730a3;
       --primary-light: #e0e7ff;
@@ -41,6 +42,29 @@
       --shadow-hover: 0 10px 25px rgba(15,23,42,0.10), 0 4px 10px rgba(15,23,42,0.05);
       --radius: 6px;
       --radius-lg: 10px;
+    }
+
+    /* Dark theme */
+    [data-theme="dark"] {
+      --primary: #6366f1;
+      --primary-dark: #818cf8;
+      --primary-light: #1e1b4b;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --info: #3b82f6;
+      --dark: #f8fafc;
+      --text: #cbd5e1;
+      --text-light: #94a3b8;
+      --bg: #0f172a;
+      --white: #1e293b;
+      --border: #334155;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+      --shadow-hover: 0 10px 25px rgba(0,0,0,0.4), 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    /* Smooth transitions for theme switching */
+    *, *::before, *::after {
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
     }
 
     /* ===== Top Bar ===== */
@@ -103,6 +127,57 @@
       margin-left: 4px;
     }
 
+    /* ===== Theme Toggle ===== */
+    .theme-toggle {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-left: 16px;
+    }
+    .theme-toggle:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary-dark);
+    }
+    .theme-toggle svg {
+      width: 20px;
+      height: 20px;
+    }
+    .theme-toggle .theme-icon-sun,
+    .theme-toggle .theme-icon-moon {
+      position: absolute;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    /* Show sun in light mode (default), hide moon */
+    :root .theme-icon-sun,
+    [data-theme="light"] .theme-icon-sun {
+      opacity: 1;
+      transform: scale(1);
+    }
+    :root .theme-icon-moon,
+    [data-theme="light"] .theme-icon-moon {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    /* Show moon in dark mode, hide sun */
+    [data-theme="dark"] .theme-icon-sun {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    [data-theme="dark"] .theme-icon-moon {
+      opacity: 1;
+      transform: scale(1);
+    }
+
     /* ===== Main Nav ===== */
     .main-nav { display: flex; gap: 4px; }
     .main-nav a {
@@ -128,6 +203,9 @@
       padding: 56px 0 44px;
       text-align: center;
       border-bottom: 1px solid var(--border);
+    }
+    [data-theme="dark"] .hero {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e1b4b 100%);
     }
     .hero h1 {
       font-size: 2.25rem;
@@ -613,6 +691,16 @@
       .hero h1 { font-size: 1.65rem; }
       .footer-grid { grid-template-columns: repeat(2, 1fr); }
       .main-nav { display: none; }
+      .theme-toggle {
+        width: 36px;
+        height: 36px;
+        padding: 6px;
+        margin-left: 8px;
+      }
+      .theme-toggle svg {
+        width: 18px;
+        height: 18px;
+      }
     }
   </style>
 </head>
@@ -644,6 +732,19 @@
         <a href="#">Insights</a>
         <a href="#">Resources</a>
       </nav>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark/light theme">
+        <span class="theme-icon-sun">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </span>
+        <span class="theme-icon-moon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+          </svg>
+        </span>
+      </button>
     </div>
   </header>
 
@@ -1445,6 +1546,61 @@
 
     // ===== Init =====
     render();
+
+    // ===== Theme Toggle =====
+    (function initTheme() {
+      const STORAGE_KEY = 'acme-theme';
+      const themeToggle = document.getElementById('themeToggle');
+      const html = document.documentElement;
+
+      function getPreferredTheme() {
+        // Check localStorage first
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) return saved;
+
+        // Check OS-level preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          return 'dark';
+        }
+
+        return 'light';
+      }
+
+      function applyTheme(theme) {
+        if (theme === 'dark') {
+          html.setAttribute('data-theme', 'dark');
+        } else {
+          html.setAttribute('data-theme', 'light');
+        }
+      }
+
+      function toggleTheme() {
+        const current = html.getAttribute('data-theme') || 'light';
+        const next = current === 'light' ? 'dark' : 'light';
+        applyTheme(next);
+        localStorage.setItem(STORAGE_KEY, next);
+      }
+
+      // Apply initial theme
+      const initialTheme = getPreferredTheme();
+      applyTheme(initialTheme);
+
+      // Listen for toggle clicks
+      if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+      }
+
+      // Listen for OS preference changes
+      if (window.matchMedia) {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        mediaQuery.addEventListener('change', (e) => {
+          // Only apply if user hasn't set a manual preference
+          if (!localStorage.getItem(STORAGE_KEY)) {
+            applyTheme(e.matches ? 'dark' : 'light');
+          }
+        });
+      }
+    })();
   </script>
 </body>
 </html>
